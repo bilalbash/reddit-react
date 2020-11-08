@@ -4,7 +4,7 @@
 ###### to install this project clone it and than type the following command:
 
 ```
-yarn start
+yarn install
 ```
 
 ###### to run this project
