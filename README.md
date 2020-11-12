@@ -10,7 +10,7 @@ Clone the repo and than change directory to new repository directory:
 ```
 git clone git@github.com:bilalbash/reddit-react.git lireddit
 cd lireddit
-git reset --hard 3f71e0389a124c3a40c9ae95a149f649b242b017
+git reset --hard [desired release commit hash]
 ```
 
 **Step # 2:**
@@ -40,4 +40,4 @@ yarn dev
 ```
 
 **Step # 6:**
-Continue this video link @ [39:38](`https://www.youtube.com/watch?v=I6ypD7qv3Z8&t=2211s`)
+Continue this video link @ [53:58](https://youtu.be/I6ypD7qv3Z8?t=3238)
