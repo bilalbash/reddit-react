@@ -1,3 +1,4 @@
+import "reflect-metadata";
 import { MikroORM } from "@mikro-orm/core";
 import { __prod__ } from "./constants";
 import microConfig from "./mikro-orm.config";
@@ -10,7 +11,7 @@ import { PostResolver } from "./resolvers/post";
 const main = async () => {
   const orm = await MikroORM.init(microConfig);
   await orm.getMigrator().up();
-  
+
   const app = express();
 
   const apolloServer = new ApolloServer({
