@@ -1,7 +1,8 @@
 import { User } from "../entities/User";
 import { MyContext } from "src/types";
-import { Arg, Ctx, Field, InputType, Mutation, ObjectType, Resolver } from "type-graphql";
+import { Arg, Ctx, Field, InputType, Mutation, ObjectType, Query, Resolver } from "type-graphql";
 import argon2 from 'argon2';
+import { assertWrappingType } from "graphql";
 
 @InputType()
 class UsernamePasswordInput {
@@ -31,6 +32,18 @@ class  UserResponse {
 
 @Resolver()
 export class UserResolver {
+  @Query(() => User, {nullable: true})
+  async me( @Ctx() { req, em }: MyContext ) {
+    console.log("session: ", req.session);
+
+    if (!req.session.userId) {
+      // you are not logged in
+      return null;
+    }
+    const user = await em.findOne(User, { id: req.session.userId });
+    return user;
+  }
+
   @Mutation(() => UserResponse)
   async register(
     @Arg('options') options: UsernamePasswordInput,
@@ -75,14 +88,16 @@ export class UserResolver {
         }
       }
     }
-    
+    // store user id session
+    // this will set a cookie on the user
+    // keep them logged in
     return { user };
   }
 
   @Mutation(() => UserResponse)
   async login(
     @Arg('options') options: UsernamePasswordInput,
-    @Ctx() { em }: MyContext
+    @Ctx() { em, req }: MyContext
   ): Promise<UserResponse> {
     const user = await em.findOne(User, { username: options.username })
     if (!user) {
@@ -106,7 +121,10 @@ export class UserResolver {
         ]
       };
     }
-    // const hashedPassword = await argon2.hash(options.password);
+
+    req.session.userId = user.id;
+    req.session.randomKet = "bilal rocks";
+
     return { user };
   }
 }
