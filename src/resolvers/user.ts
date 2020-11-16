@@ -2,7 +2,6 @@ import { User } from "../entities/User";
 import { MyContext } from "src/types";
 import { Arg, Ctx, Field, InputType, Mutation, ObjectType, Query, Resolver } from "type-graphql";
 import argon2 from 'argon2';
-import { assertWrappingType } from "graphql";
 
 @InputType()
 class UsernamePasswordInput {
