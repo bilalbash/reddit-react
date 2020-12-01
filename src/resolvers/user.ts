@@ -1,8 +1,9 @@
-import { User } from "../entities/User";
+import { EntityManager } from "@mikro-orm/postgresql";
+import argon2 from 'argon2';
+import { COOKIE_NAME } from "../constants";
 import { MyContext } from "src/types";
 import { Arg, Ctx, Field, InputType, Mutation, ObjectType, Query, Resolver } from "type-graphql";
-import argon2 from 'argon2';
-import { EntityManager } from "@mikro-orm/postgresql";
+import { User } from "../entities/User";
 
 @InputType()
 class UsernamePasswordInput {
@@ -16,24 +17,24 @@ class UsernamePasswordInput {
 class FieldError {
   @Field()
   field: string;
-  
+
   @Field()
   message: string;
 }
 
 @ObjectType()
-class  UserResponse {
-  @Field(() => [FieldError], {nullable: true})
+class UserResponse {
+  @Field(() => [FieldError], { nullable: true })
   errors?: FieldError[];
 
-  @Field(() => User, {nullable: true})
+  @Field(() => User, { nullable: true })
   user?: User;
 }
 
 @Resolver()
 export class UserResolver {
-  @Query(() => User, {nullable: true})
-  async me( @Ctx() { req, em }: MyContext ) {
+  @Query(() => User, { nullable: true })
+  async me(@Ctx() { req, em }: MyContext) {
     console.log("session: ", req.session);
 
     if (!req.session.userId) {
@@ -84,7 +85,7 @@ export class UserResolver {
         })
         .returning('*');
       user = result[0];
-    } catch(err) {
+    } catch (err) {
       if (err.code === "23505") {
         return {
           errors: [
@@ -132,8 +133,26 @@ export class UserResolver {
     }
 
     req.session.userId = user.id;
-    req.session.randomKet = "bilal rocks";
 
-    return { user };
+    return {
+      user
+    };
+  }
+
+  @Mutation(() => Boolean)
+  logout(@Ctx() { req, res }: MyContext) {
+    return new Promise((resolve) => 
+      // @ts-ignore
+      req.session.destroy((err) => {
+        res.clearCookie(COOKIE_NAME);
+        if (err) {
+          console.log(err);
+          resolve(false);
+          return;
+        }
+
+        resolve(true);
+      })
+    );
   }
 }
